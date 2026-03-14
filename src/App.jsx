@@ -2,23 +2,30 @@ import { useEffect, useState } from "react";
 import "./App.css";
 
 /**
- * Main Podcast App
- * Handles fetching data, search, sort, filter and pagination.
+ * Podcast Explorer Application
+ *
+ * Main application component responsible for:
+ * - Fetching podcast data from the API
+ * - Managing global UI state
+ * - Synchronising search, sorting, filtering and pagination
+ *
+ * @component
+ * @returns {JSX.Element}
  */
 function App() {
 
-  // podcast data
+  /** Podcast data */
   const [podcasts, setPodcasts] = useState([]);
 
-  // loading state
+  /** Loading state */
   const [loading, setLoading] = useState(true);
 
-  // UI states
+  /** UI states */
   const [search, setSearch] = useState("");
   const [sort, setSort] = useState("newest");
   const [genre, setGenre] = useState("all");
 
-  // pagination
+  /** Pagination state */
   const [currentPage, setCurrentPage] = useState(1);
   const podcastsPerPage = 12;
 
@@ -42,6 +49,13 @@ function App() {
   }, []);
 
   /**
+   * Reset pagination when filters change
+   */
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, genre, sort]);
+
+  /**
    * Filter podcasts
    */
   const filtered = podcasts.filter((podcast) => {
@@ -59,7 +73,7 @@ function App() {
   /**
    * Sort podcasts
    */
-  const sorted = filtered.sort((a, b) => {
+  const sorted = [...filtered].sort((a, b) => {
 
     if (sort === "newest") {
       return new Date(b.updated) - new Date(a.updated);
@@ -77,7 +91,7 @@ function App() {
   });
 
   /**
-   * Pagination logic
+   * Pagination calculations
    */
   const indexLast = currentPage * podcastsPerPage;
   const indexFirst = indexLast - podcastsPerPage;
@@ -98,10 +112,7 @@ function App() {
           type="text"
           placeholder="Search podcasts..."
           value={search}
-          onChange={(e) => {
-            setSearch(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setSearch(e.target.value)}
         />
 
         <select
@@ -109,16 +120,13 @@ function App() {
           onChange={(e) => setSort(e.target.value)}
         >
           <option value="newest">Newest</option>
-          <option value="az">Title A-Z</option>
-          <option value="za">Title Z-A</option>
+          <option value="az">Title A–Z</option>
+          <option value="za">Title Z–A</option>
         </select>
 
         <select
           value={genre}
-          onChange={(e) => {
-            setGenre(e.target.value);
-            setCurrentPage(1);
-          }}
+          onChange={(e) => setGenre(e.target.value)}
         >
           <option value="all">All Genres</option>
           <option value="1">Personal Growth</option>
@@ -134,7 +142,13 @@ function App() {
 
       </div>
 
-      {loading && <p>Loading podcasts...</p>}
+      {/* LOADING */}
+      {loading && <p style={{textAlign:"center"}}>Loading podcasts...</p>}
+
+      {/* EMPTY STATE */}
+      {!loading && currentPodcasts.length === 0 && (
+        <p style={{textAlign:"center"}}>No podcasts found.</p>
+      )}
 
       {/* PODCAST GRID */}
       <div className="grid">
